@@ -7,3 +7,5 @@ Uses Wolfram|Alpha for approximation of the root of the polynomial for the highl
 Enter your Wolfram|Alpha APPID into `wolfram-appid.php` and ready to go.
 
 ![ScreenShot](/screenshot.png)
+
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org/)
