@@ -56,7 +56,8 @@
 	$x = false;
 
 	foreach ($subpods as $subpod) {
-		// plaintext is x = num or x~num
+		// plaintext is x = num or x~num or {x->num} (this last is for FindRoot queries)
+		// simply extract any number from the results
 		if (preg_match("/-?[0123456789]+\.?[0123456789]*/", $subpod['plaintext'], $m)) {
 			$val = $m[0] * 1.0;
 			if ($val > 0) {
