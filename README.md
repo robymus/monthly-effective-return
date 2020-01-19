@@ -2,9 +2,7 @@
 
 A simple tool to calculate effective monthly/yearly return for an investment/savings where you add the same amount every month.
 
-Uses Wolfram|Alpha for approximation of the root of the polynomial for the highly compound interests.
-
-Enter your Wolfram|Alpha APPID into `wolfram-appid.php` and ready to go.
+Uses approximation of the root of the polynomial for the highly compound interest. (Not totally precise due to JavaScript floating point precision).
 
 ![ScreenShot](/screenshot.png)
 

@@ -1,1 +1,0 @@
-<?php return "PUT-YOUR-WOLFRAM-ALPHA-APPID-HERE"; ?>
