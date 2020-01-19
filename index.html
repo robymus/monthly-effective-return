@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Monthly savings :: effective compound return</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <style>
+    .results {}
+  </style>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>  
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a class="navbar-brand" href="#">Monthly savings :: effective compound return calculator</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <form id="inputForm">
+
+    <div class="row">
+      <div class="col-lg-12">
+        <h4>Investment parameters</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="form-group">
+          <label for="monthly">Monthly savings</label>
+          <input type="text" class="form-control" id="monthly" aria-describedby="monthlyHelp" onchange="changeField('monthly')">
+          <small id="monthlyHelp" class="form-text text-muted">Provide 2 of 3</small>
+          <div class="invalid-feedback">
+            Something wrong :(
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="form-group">
+          <label for="months">For how many months?</label>
+          <input type="text" class="form-control" id="months" onchange="changeField('months')">
+          <div class="invalid-feedback">
+            Something wrong :(
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="form-group">
+          <label for="total">Savings total</label>
+          <input type="text" class="form-control" id="total" onchange="changeField('total')">
+          <div class="invalid-feedback">
+            Something wrong :(
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <h4>Current Value</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="form-group">
+          <label for="balance">Value</label>
+          <input type="text" class="form-control" id="balance" onchange="changeField('balance')">
+          <div class="invalid-feedback">
+            Something wrong :(
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-4">
+        <button class="btn btn-primary" type="button" onclick="formSubmit()">Calculate effective return</button>
+      </div>
+    </div>
+
+    </form>
+  </div>
+
+  <div class="container" id="results-panel">
+    <div class="row">
+      <div class="col-lg-12">
+        <h4>&nbsp;</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12">
+        <h4>Effective return rates</h4>
+      </div>
+    </div>
+
+    <div class="row" id="spinner">
+      <div class="col-lg-12">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+   <div class="row results">
+      <div class="col-lg-4">
+        <div style="font-size: 1.5em;">Monthly</div>
+      </div>
+      <div class="col-lg-8">
+        <div style="font-size: 1.5em;" id="res-monthly">0%</div>
+      </div>
+    </div>
+
+   <div class="row results">
+      <div class="col-lg-4">
+        <div style="font-size: 1.5em;">Yearly</div>
+      </div>
+      <div class="col-lg-8">
+        <div style="font-size: 1.5em;" id="res-yearly">0%</div>
+      </div>
+    </div>
+
+   <div class="row">
+      <div class="col-lg-8">
+        <p></p>
+        <p id="equation" style="font-size: 1.5em;">
+        </p>
+        <p>
+          <a id="wolframlink" href="https://www.wolframalpha.com" target="_blank">Computed by Wolfram|Alpha</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>  
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+  <script>
+
+    window.lastChanged = null;
+
+    // helper: checks if form value in #name is a valid number (and integer for "months")
+    function isValid_(name) {
+      if (name == null) return false;
+      var val = $('#'+name).val();
+      if (val == "") return false;
+      var num = Number(val);
+      if (isNaN(num)) return false;
+      if (num <= 0) return false;
+      if (name == "months" && !Number.isInteger(num)) return false;
+      return true;
+    }
+
+    // checks if valid and sets css as well
+    function isValid(name) {
+      var valid = isValid_(name);
+      if (valid) {
+        $('#'+name).removeClass('is-invalid');
+        $('#'+name).addClass('is-valid');
+      }
+      else {
+        $('#'+name).removeClass('is-valid');
+        $('#'+name).addClass('is-invalid');
+      }
+      return valid;
+    }
+
+    function changeField(changed) {
+      if (!isValid(changed)) return;
+      if (changed == 'balance') return; // nothing to do with balance
+      var bases = [changed];
+      if (window.lastChanged != changed && window.lastChanged != null) {
+        bases.push(window.lastChanged);
+      }
+      else {
+        if (changed != "monthly" && isValid_("monthly")) bases.push("monthly");
+        else if (changed != "months" && isValid_("months")) bases.push("months");
+        else if (changed != "total" && isValid_("total")) bases.push("total");
+      }
+      window.lastChanged = changed;
+      if (bases.length != 2) return; // can't calculate
+      // target is the missing one
+      if (!bases.includes("total")) {
+        $('#total').val($('#monthly').val()*$('#months').val());       
+        isValid("total");
+      }
+      else if (!bases.includes("months")) {
+        $('#months').val(Math.floor($('#total').val()/$('#monthly').val()));
+        $('#total').val($('#monthly').val()*$('#months').val()); 
+        isValid("months");
+      }
+      else if (!bases.includes("monthly")) {
+        $('#monthly').val(Math.floor($('#total').val()/$('#months').val()));
+        $('#total').val($('#monthly').val()*$('#months').val());         
+        isValid("monthly");
+      }
+    }
+
+    function result_ok(res) {
+        $('#res-monthly').text(res['monthly']).removeClass("text-danger").addClass("text-primary");
+        $('#res-yearly').text(res['yearly']).removeClass("text-danger").addClass("text-primary");
+        $('#wolframlink').attr('href', res['wolframlink']);
+        $('.results').show();
+        $('#spinner').hide();      
+    }
+
+    function result_fail(reason) {
+        $('#res-monthly').text('Error').addClass("text-danger").removeClass("text-primary");
+        $('#res-yearly').text(reason).addClass("text-danger").removeClass("text-primary");
+        $('.results').show();
+        $('#spinner').hide();              
+    }
+
+    function formSubmit() {
+      var valid = true;
+      var fields = ["monthly", "months", "total", "balance"];
+      var formData = {}
+      fields.forEach(function(x) {
+        formData[x] = $('#'+x).val();
+        if (!isValid(x)) valid = false;        
+      });
+      if (!valid) return;
+
+      $('#equation').text('\\('+formData['monthly']+'\\times\\sum\\limits_{i=1}^{'+formData['months']+'} x^i='+formData['balance']+'\\)');
+      MathJax.texReset();
+      MathJax.typesetClear();
+      MathJax.typesetPromise();
+
+      $('.results').hide();
+      $('#spinner').show();
+      $('#results-panel').show();
+
+      $.ajax({
+        url: "calculate.php",
+        method: "POST",
+        data: formData,
+        dataType: "json"
+      }).done(function(res) {
+        if (res['success']) {
+          result_ok(res);
+        }
+        else {
+          result_fail(res['reason']);
+        }
+      })
+      .fail(function() {
+        result_fail('AJAX call failed');
+      });
+    }
+
+    $('#results-panel').hide();
+  </script>
+
+</body>
+
+</html>
